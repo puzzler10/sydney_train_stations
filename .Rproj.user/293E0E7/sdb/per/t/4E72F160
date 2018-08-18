@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "library(pacman)\np_load(dplyr)\np_load(tidyr)\np_load(ggmap)\np_load(animation)\n\n\ndat = read.csv(\"sydney_train_stations.csv\")\n\n#railway line is dodgy, don't use it \n#first thing we need to do is get lat and long of each station \nstations = paste(dat$name, \"Station, NSW, Australia\")\n\n#use geocode function from ggmap to get lat and lon for each station \ncoords = geocode(stations)\n#add it to our data frame\ndat = as.data.frame(cbind(dat, coords) )\n\n#save the results because that took effort \nwrite.csv(dat,\"sydney_train_stations_coordinates.csv\", row.names = FALSE)\n\n##################\ndat = read.csv(\"sydney_train_stations_coordinates.csv\", stringsAsFactors = FALSE)\ndat$date_opened =  as.Date(dat$date_opened, format = \"%d/%m/%Y\")\n\n#get sydney map, but set the center a bit to the right to account for water \nsydney_coords = geocode(\"Sydney\")\n\nsydney = get_map(location = c(lon = (151.2093 - 0.2), lat = -33.86882 ),\n                 maptype = \"toner-background\" ,\n                 zoom = 10)\n\n### Animation ### \n### For each 10 year block, plot the points \ndate_cutoffs = seq.Date(from = as.Date(\"1860/1/1\"), to = as.Date(\"2020/1/1\"), by = \"10 years\")\n\n\nsaveHTML({\n    for(i in 1:length(date_cutoffs)) {\n        df = dat %>% filter(date_opened <= date_cutoffs[i])\n        g = ggmap(sydney) + \n            geom_point(data = df, \n                       aes(x = lon, y = lat),\n                       color = \"red\", \n                       size = 2) + \n            ggtitle(format(date_cutoffs[i],'%Y'))\n        plot(g)\n        ani.pause()\n    }\n}, img.name = \"train_plot\", navigator = FALSE, html_file = \"train_plot.html\")\n\n\n#plot points on the map \nggmap(sydney) + \n    geom_point(data = dat, \n               aes(x = lon, y = lat),\n               color = \"red\", \n               size = 2)\n\n\n\n",
+    "created" : 1534557351356.000,
+    "dirty" : false,
+    "encoding" : "ASCII",
+    "folds" : "",
+    "hash" : "3812927789",
+    "id" : "4E72F160",
+    "lastKnownWriteTime" : 1534557989,
+    "last_content_update" : 1534557989691,
+    "path" : "~/Dropbox/R projects/sydney_train_stations/sydney_train_stations.R",
+    "project_path" : "sydney_train_stations.R",
+    "properties" : {
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
